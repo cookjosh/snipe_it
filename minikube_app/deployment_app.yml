@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snipeit
+spec:
+  selector:
+    matchLabels:
+      app: snipeit
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: snipeit
+    spec:
+      containers:
+      - image: snipe/snipe-it:latest
+        name: snipeit
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_HOST
+          value: mariadb
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_DATABASE
+          value: mariadb
+        - name: MYSQL_USER
+          value: snipeit
+        - name: MYSQL_PASSWORD
+          value: {secret}
+        - name: APP_KEY
+          value: {secret}
+        - name: APP_ENV
+          value: production
+        - name: APP_DEBUG
+          value: "'true'"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snipeit
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: snipeit
